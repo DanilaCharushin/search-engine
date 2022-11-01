@@ -1,0 +1,132 @@
+# https://taskfile.dev
+
+version: "3"
+
+tasks:
+  init:
+    desc: Fastest way to start developing
+    cmds:
+      - echo "Vrum-vrum..."
+      - task: attach-hooks
+      - task: venv
+      - task: install
+      - task: test
+      - task: lint
+      - task: up
+      - echo "You are perfect!"
+
+  attach-hooks:
+    desc: Attaches git hooks
+    cmds:
+      - cp .git-hooks/pre-commit.sh .git/hooks/pre-commit
+      - cp .git-hooks/pre-push.sh .git/hooks/pre-push
+      - chmod 777 .git/hooks/pre-commit
+      - chmod 777 .git/hooks/pre-push
+
+  venv:
+    desc: Create virtual environment "venv" locally
+    cmds:
+      - python3 -m venv venv
+
+  install:
+    desc: Install dependencies.
+    cmds:
+      - venv/bin/pip install -r backend/requirements/requirements.lock.txt -r backend/requirements/requirements.dev.txt
+
+  up:
+    desc: Run application in compose
+    cmds:
+      - docker-compose up app dramatiq scheduler
+
+  down:
+    desc: Stop any compose
+    cmds:
+      - docker-compose down
+
+  lint:
+    desc: Lint code and check formatting
+    cmds:
+      - cd backend && bash -e bin/run-linters.sh ../venv/bin/python
+
+  format:
+    desc: Format code
+    cmds:
+      - cd backend && ../venv/bin/python -m black .
+      - cd backend && ../venv/bin/python -m isort .
+
+  freeze:
+    desc: Create temp venv, update pip, install deps from requirements.txt
+      and freeze dependencies to requirements.lock.txt.
+    cmds:
+      - python3 -m venv venv_tmp
+      - venv_tmp/bin/pip install -U pip
+      - venv_tmp/bin/pip install --require-virtualenv -r backend/requirements/requirements.txt
+      - venv_tmp/bin/pip freeze > backend/requirements/requirements.lock.txt
+      - rm -rf venv_tmp
+
+  mm:
+    desc: Run "makemigrations" manage command
+    cmds:
+      - docker compose exec -w /backend -- app /app/bin/python manage.py makemigrations
+
+  build:
+    desc: Build docker image. If you want to rebuild image after adding new requirement, you have to firstly do `task freeze`
+    cmds:
+      - docker-compose build app
+
+  deptree:
+    desc: Show python installed packages (locally installed!) dependencies as tree.
+    cmds:
+      - pipdeptree -fl
+
+  clean:
+    desc: Uninstall all dependencies from venv.
+    cmds:
+      - venv/bin/pip freeze | xargs venv/bin/pip uninstall -y
+
+  test:
+    desc: Run application tests in compose
+    cmds:
+      - docker-compose run -e DJANGO_SETTINGS_MODULE=app.settings.test app sh -e /backend/bin/run-tests.sh {{.CLI_ARGS}}
+
+  test:load:
+    desc: Run application tests in compose
+    cmds:
+      - docker-compose run -e DJANGO_SETTINGS_MODULE=app.settings.test app sh -e /backend/bin/run-tests.sh tests/load_tests
+
+  test:func:
+    desc: Run application tests in compose
+    cmds:
+      - docker-compose run -e DJANGO_SETTINGS_MODULE=app.settings.test app sh -e /backend/bin/run-tests.sh tests/functional_tests
+
+  test:concrete:
+    desc: Run concrete (by test name matching) application tests in compose. Usage - "test:concrete -- test_some_logic"
+    cmds:
+      - docker-compose run -e DJANGO_SETTINGS_MODULE=app.settings.test app sh -e /backend/bin/run-tests.sh "-k {{.CLI_ARGS}}"
+
+  test:failed:
+    desc: Run only failed application tests in compose
+    cmds:
+      - docker-compose run -e DJANGO_SETTINGS_MODULE=app.settings.test app sh -e /backend/bin/run-tests.sh --lf
+
+  test:parallel:
+    desc: Run application tests in compose
+    cmds:
+      - docker-compose run -e DJANGO_SETTINGS_MODULE=app.settings.test app sh -e /backend/bin/run-tests.sh -n=auto
+
+  allure:
+    desc: Run application tests in compose
+    cmds:
+      - allure serve backend/tmp/allure -h localhost -p 4445
+      - allure open backend/tmp/allure -h localhost -p 4445
+
+  coverage:
+    desc: Run application tests in compose
+    cmds:
+      - docker compose exec -w /backend -- app /app/bin/python -m coverage html && open backend/tmp/htmlcov/index.html
+
+  redis-ui:
+    desc: Open redis-ui tool (wait a few seconds and reload browser page after its opening)
+    cmds:
+      - open http://localhost:8001
+      - docker-compose up redis-ui

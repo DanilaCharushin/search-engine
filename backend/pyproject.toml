@@ -1,0 +1,75 @@
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "app.settings.test"
+python_files = "tests.py test_*.py *_tests.py"
+python_functions = "test_* *_test"
+addopts = "--color=yes -vvv -sv --durations=10 --showlocals --alluredir=tmp/allure"
+norecursedirs = ".git .tox venv* requirements*"
+cache_dir = "tmp/pytest_cache"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::django.utils.deprecation.RemovedInDjango41Warning",
+]
+
+
+[tool.coverage.run]
+source = ["app"]
+omit = [
+    "*/migrations/*",
+    "*/settings/*",
+    "*/serializers/*",
+    "*/swagger/*",
+    "*/__init__.py",
+    "*/wsgi.py",
+    "*/asgi.py",
+    "*/urls.py",
+    "*/admin.py",
+    "*/exceptions.py",
+    "*/schemas.py",
+    "*/prometheus.py",
+    "*/serializers.py",
+]
+disable_warnings = ["no-data-collected", "module-not-imported"]
+branch = true
+data_file = "tmp/.coverage"
+
+[tool.coverage.report]
+skip_covered = true
+skip_empty = true
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "def __str__",
+    "if TYPE_CHECKING:",
+    "noqa",
+]
+
+[tool.coverage.html]
+directory = "tmp/htmlcov"
+
+
+[tool.black]
+target-version = ["py38"]
+line-length = 120
+include = '\.pyi?$'
+exclude = '''
+(
+  /(
+    \.git
+    | migrations
+    | venv
+    | venv_tmp
+  )/
+  | manage.py
+)
+'''
+
+
+[tool.isort]
+line_length = 120
+profile = "black"
+skip = [
+    "venv",
+    "venv_tmp",
+    "migrations",
+]

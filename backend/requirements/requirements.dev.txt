@@ -1,0 +1,52 @@
+# dependencies management
+pipdeptree
+
+# formatting
+black
+isort
+
+# linting
+bandit
+flake8<5
+flake8-black
+flake8-builtins
+flake8-import-order
+flake8-quotes
+flake8-broken-line
+flake8-bugbear
+flake8-commas
+flake8-comprehensions
+flake8-django
+flake8-fixme
+flake8-multiline-containers
+flake8-pep3101
+flake8-pie
+flake8-print
+flake8-printf-formatting
+flake8-pytest-style
+flake8-return
+flake8-requirements
+flake8-simplify
+flake8-cognitive-complexity
+flake8-expression-complexity
+flake8-class-attributes-order
+flake8-use-fstring
+flake8-aaa
+flake8-annotations-coverage
+flake8-eradicate
+pep8-naming
+dlint
+
+# testing
+pytest<7.2,>=7.1
+pytest-randomly
+pytest-lazy-fixture
+pytest-django
+coverage[toml]
+allure-pytest
+pytest-sugar
+pytest-xdist
+
+# pytest-xdist==2.5.0
+
+

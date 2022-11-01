@@ -1,0 +1,42 @@
+[flake8]
+max-line-length = 120
+max-complexity = 10
+application-import-names = core
+import-order-style = google
+inline-quotes = "
+statistics = true
+format = backend/%(path)s:%(row)d:%(col)d: %(code)s %(text)s
+exclude = venv,
+          migrations,
+          manage.py,
+          __init__.py,
+          setup.py,
+          venv_tmp
+ignore = AAA01,
+         C901,
+         CCR001,
+         ECE001,
+         I100,
+         I201,
+         I202,
+         I900,
+         E501,
+         E203,
+         PIE786,
+         PIE795,
+         PIE798,
+         PIE803,
+         F403,
+         F405,
+         TAE001,
+         DUO131,
+         FS003,
+         CCE001,
+         SIM102,
+         SIM106,
+         SIM116,
+         W503,
+         DJ01,
+         DJ08,
+         T101,
+         I101

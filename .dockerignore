@@ -1,0 +1,9 @@
+.git
+.idea
+.editorconfig
+.gitignore
+
+tmp
+venv
+venv_tmp
+backend/metrics

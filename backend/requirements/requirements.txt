@@ -1,0 +1,36 @@
+# Django
+Django<4,>=3.2.13
+django-prometheus
+django-cors-headers
+psycopg2-binary
+django-log-request-id
+django-json-widget
+
+# DRF
+djangorestframework
+django-filter
+drf-spectacular[sidecar]
+
+# application dependencies
+requests
+aiohttp
+python-dotenv
+context-logging
+
+# serving
+gunicorn
+whitenoise
+
+# async tasks
+dramatiq[redis,watch]
+django-dramatiq
+dramatiq_dashboard
+
+# periodic tasks
+django-apscheduler
+
+# json-schema validation
+pydantic
+
+# parsing
+beautifulsoup4
