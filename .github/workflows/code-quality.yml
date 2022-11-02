@@ -11,7 +11,7 @@ jobs:
       - name: "Check out Git repository"
         uses: actions/checkout@v2
 
-      - name: "Set up Python 3.8.15"
+      - name: "Set up Python 3.8.14"
         uses: actions/setup-python@v1
         with:
           python-version: 3.8.14
@@ -30,7 +30,7 @@ jobs:
       - name: "Check out Git repository"
         uses: actions/checkout@v2
 
-      - name: "Build images"
+      - name: "Build docker image"
         run: docker-compose build --no-cache tests-in-ci
 
       - name: "Run tests in compose"

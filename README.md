@@ -1,3 +1,5 @@
+![code quality](https://github.com/DanilaCharushin/search-engine/actions/workflows/code-quality.yml/badge.svg)
+
 ## Info
 
 * Python version: `3.8`
