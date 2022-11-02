@@ -1,0 +1,40 @@
+name: "Code quality"
+
+on: push
+
+jobs:
+  lint:
+    name: "Run linters"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Check out Git repository"
+        uses: actions/checkout@v2
+
+      - name: "Set up Python 3.8.15"
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8.15
+
+      - name: "Install Python dependencies"
+        run: pip install -r backend/requirements/requirements.lock.txt -r backend/requirements/requirements.dev.txt
+
+      - name: "Lint code"
+        run: cd backend && bash -e bin/run-linters.sh
+
+  test:
+    name: "Run tests"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Check out Git repository"
+        uses: actions/checkout@v2
+
+      - name: "Build images"
+        run: docker-compose build --no-cache tests-in-ci
+
+      - name: "Run tests in compose"
+        run: docker-compose up tests-in-ci
+
+      - name: "Clean up"
+        run: docker-compose down

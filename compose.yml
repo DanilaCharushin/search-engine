@@ -36,6 +36,13 @@ services:
     <<: *base_with_volume
     command: [ "sh", "-e", "/backend/bin/run-scheduler.sh" ]
 
+  tests-in-ci:
+    <<: *base
+    container_name: tests-in-ci
+    command: [ "sh", "-e", "/backend/bin/run-tests.sh" ]
+    environment:
+      DJANGO_SETTINGS_MODULE: app.settings.test
+
   postgres:
     image: postgres:13-alpine
     restart: always
