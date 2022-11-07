@@ -34,3 +34,6 @@ pydantic
 
 # parsing
 beautifulsoup4
+
+airium
+tabulate

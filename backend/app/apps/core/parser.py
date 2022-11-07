@@ -22,7 +22,7 @@ class Parser:
         for tag in tags:
             tag_text = tag.find(text=True, recursive=False)
             if tag_text is not None:
-                href = None
+                href = ""
                 if tag.name == "a":
                     href = tag.get("href")
                     if href is not None:
@@ -34,9 +34,6 @@ class Parser:
                         ):
                             continue
                         href = href.strip("/")
-
-                if not href:
-                    continue
 
                 for location, word in enumerate(cls._text_to_wordlist(tag_text), start=len(search_elements)):
                     search_elements.append(SearchElement(word=word, location=location, href=href))

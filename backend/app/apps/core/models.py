@@ -1,10 +1,14 @@
 import dataclasses
-from typing import List
+import itertools
+from collections import defaultdict
+from typing import Dict, List
 
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.timezone import now
+
+from .entities import WordLocationsCombination
 
 
 @dataclasses.dataclass
@@ -19,7 +23,6 @@ class SearchElement:
 
 class Word(models.Model):
     value = models.TextField(unique=True)
-    is_filtered = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "Слово"
@@ -31,7 +34,7 @@ class Word(models.Model):
 
 class Url(models.Model):
     value = models.TextField(unique=True)
-    is_crawled = models.BooleanField(default=False)
+    is_crawled = models.BooleanField(default=False, db_index=True)
 
     words = models.ManyToManyField(
         Word,
@@ -55,7 +58,41 @@ class UrlWord(models.Model):
     class Meta:
         verbose_name = "Ссылка <-> Слово"
         verbose_name_plural = "Ссылки <-> Слова"
-        unique_together = ("url", "word")
+        unique_together = ("url", "word", "location")
+
+    @staticmethod
+    def get_words_locations_combinations(words: List[str]) -> List[WordLocationsCombination]:
+        def __check_and_fill_locations_list(_url_id: int) -> None:
+            """
+            `urls_ids_to_locations_map` dict looks like this (`123` is url_id):
+            {
+                123: [[],[],[], ...]
+            }         |  |  |
+                      |  |  locations for third word
+                      |  locations for second word
+                      locations for first word
+            """
+            if not urls_ids_to_locations_map[_url_id]:
+                for _ in range(len(words)):
+                    urls_ids_to_locations_map[_url_id].append([])
+
+        urls_ids_to_locations_map: Dict[int, List[list]] = defaultdict(list)
+
+        for word_index, word in enumerate(words):
+            url_words = UrlWord.objects.filter(word=Word.objects.get(value=word)).order_by("location", "url_id")
+            for url_word in url_words:
+                __check_and_fill_locations_list(url_word.url_id)
+                urls_ids_to_locations_map[url_word.url_id][word_index].append(url_word.location)
+
+        result = []
+        for url_id, locations_by_word in urls_ids_to_locations_map.items():
+            if not all(locations_by_word):
+                continue
+
+            for combination in itertools.product(*locations_by_word):
+                result.append(WordLocationsCombination(url_id, list(combination)))
+
+        return result
 
 
 class Link(models.Model):
@@ -92,7 +129,7 @@ class LinkWord(models.Model):
 
 class PageRank(models.Model):
     value = models.FloatField()
-    url = models.ForeignKey(Url, on_delete=models.CASCADE)
+    url = models.ForeignKey(Url, on_delete=models.CASCADE, related_name="ranks")
 
     class Meta:
         verbose_name = "Ранг страницы"
@@ -110,7 +147,7 @@ class RunStatus(models.TextChoices):
 
 class Run(models.Model):
     raw_urls = models.TextField(verbose_name="Список url для запуска (через запятую)")
-    depth = models.IntegerField(verbose_name="Глубина обхода", default=2)
+    depth = models.IntegerField(verbose_name="Глубина обхода (0 - только страницу, 1 - +вложенные и т.д.)", default=1)
 
     status = models.CharField(max_length=50, choices=RunStatus.choices, editable=False, default=RunStatus.RUNNING)
 
